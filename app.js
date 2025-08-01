@@ -68,13 +68,31 @@ function spawn(count = 1) {
     let dx = (Math.random() * 1.5 + 0.5) * (Math.random() < 0.5 ? -1 : 1);
     let dy = (Math.random() * 1.5 + 0.5) * (Math.random() < 0.5 ? -1 : 1);
 
+    // Retro dark aesthetic styling for prank/satire
     asset.style.position = 'absolute';
     asset.style.width = assetSize + 'px';
     asset.style.height = assetSize + 'px';
-    asset.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
+    
+    // Dark retro colors with sinister undertones
+    const darkRetroColors = ['#660033', '#003366', '#330066', '#663300', '#006633', '#663333', '#336600', '#333366'];
+    const color = darkRetroColors[i % darkRetroColors.length];
+    
+    asset.style.background = `radial-gradient(circle at 30% 30%, ${color}AA, ${color}44)`;
+    asset.style.border = `2px solid ${color}88`;
     asset.style.borderRadius = '50%';
-    asset.style.transform = `translate(${x}px, ${y}px)`;
+    asset.style.boxShadow = `0 0 15px ${color}44, inset 0 0 15px ${color}22`;
+    asset.style.transform = `translate(${x}px, ${y}px) scale(0)`;
     asset.style.transition = 'none';
+    
+    // Add dark retro grid pattern
+    asset.style.backgroundImage = `radial-gradient(circle at 30% 30%, ${color}AA, ${color}44), 
+                                   repeating-linear-gradient(45deg, transparent, transparent 2px, ${color}11 2px, ${color}11 4px)`;
+    
+    // Spawn animation with ominous feel
+    setTimeout(() => {
+      asset.style.transition = 'transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+      asset.style.transform = `translate(${x}px, ${y}px) scale(1)`;
+    }, i * 150); // Slower, more menacing spawn
     
     spawnArea.appendChild(asset);
 
@@ -120,8 +138,17 @@ function animate() {
       assetData.dy = -Math.abs(assetData.dy);
     }
 
-    // Apply the new position
-    assetData.el.style.transform = `translate(${assetData.x}px, ${assetData.y}px)`;
+    // Apply the new position with subtle dark glitch effect
+    const glitchOffset = Math.sin(Date.now() * 0.01 + i) * 0.3;
+    assetData.el.style.transform = `translate(${assetData.x + glitchOffset}px, ${assetData.y}px) scale(1)`;
+    
+    // Add rare ominous pulse effect
+    if (Math.random() < 0.0005) {
+      assetData.el.style.filter = 'brightness(0.7) saturate(1.2)';
+      setTimeout(() => {
+        assetData.el.style.filter = 'none';
+      }, 200);
+    }
   }
   
   requestAnimationFrame(animate);
@@ -146,45 +173,73 @@ recognition.addEventListener('result', evt => {
   
   // Avoid processing the same transcript multiple times
   if (transcript === lastTranscript) return;
+  
+  // Only update lastTranscript if we're actually going to process this command
+  const isValidCommand = (stage === 0 && transcript.includes(CMD_HELLO)) ||
+                        ((stage === 1 || stage === 2) && transcript.includes(CMD_REMOVE));
+                        
+  if (!isValidCommand) return;
+  
   lastTranscript = transcript;
 
   console.log('Processing transcript:', transcript, 'Stage:', stage);
 
   // Tutorial flow with enhanced feedback
   if (stage === 0 && transcript.includes(CMD_HELLO)) {
-    messageEl.textContent = 'Awesome voice! 🎉 Spawning two items...';
-    messageEl.style.background = 'rgba(76, 175, 80, 0.3)';
-    spawn(2);
+    messageEl.textContent = '◆ Oh wow, you can speak! How... impressive. ◆';
+    messageEl.style.background = 'linear-gradient(45deg, #330033, #003333)';
+    messageEl.style.color = '#cccccc';
+    messageEl.style.textShadow = '0 0 8px #666666';
+    messageEl.style.animation = 'retroPulse 0.5s ease-in-out';
+    
     setTimeout(() => {
-      messageEl.textContent = `Perfect! Now say "${CMD_REMOVE}" to remove one`;
-      messageEl.style.background = 'rgba(255,255,255,0.1)';
-      stage = 1;
-    }, 2000);
+      messageEl.textContent = '▶ Deploying your "reward"... how exciting... ◀';
+      messageEl.style.animation = 'retroGlitch 0.3s ease-in-out';
+      spawn(2);
+      
+      setTimeout(() => {
+        messageEl.textContent = `☆ Now say "${CMD_REMOVE.toUpperCase()}" if you dare ☆`;
+        messageEl.style.background = 'rgba(51, 0, 51, 0.4)';
+        messageEl.style.color = '#999999';
+        messageEl.style.textShadow = '0 0 8px #555555';
+        messageEl.style.animation = 'none';
+        stage = 1;
+      }, 1000);
+    }, 1500);
   }
   else if (stage === 1 && transcript.includes(CMD_REMOVE)) {
-    // Remove one asset if it exists
+    // Remove one asset with sarcastic destruction effect
     if (assets.length > 0) {
       const removedAsset = assets.shift();
       if (removedAsset.el.parentNode) {
-        removedAsset.el.style.transition = 'all 0.3s ease-out';
-        removedAsset.el.style.transform += ' scale(0)';
+        removedAsset.el.style.transition = 'all 0.6s ease-out';
+        removedAsset.el.style.transform += ' scale(0) rotate(180deg)';
         removedAsset.el.style.opacity = '0';
+        removedAsset.el.style.filter = 'brightness(0.5) hue-rotate(90deg)';
         setTimeout(() => {
           if (removedAsset.el.parentNode) {
             removedAsset.el.remove();
           }
-        }, 300);
+        }, 600);
       }
     }
 
-    messageEl.textContent = 'Excellent! 🎯 Say "remove it" louder to spawn more!';
-    messageEl.style.background = 'rgba(33, 150, 243, 0.3)';
+    messageEl.textContent = '◇ Congratulations. You destroyed something. ◇';
+    messageEl.style.background = 'linear-gradient(45deg, #003333, #330033)';
+    messageEl.style.color = '#aaaaaa';
+    messageEl.style.textShadow = '0 0 10px #444444';
+    messageEl.style.animation = 'retroFlash 0.3s ease-in-out';
+    
     setTimeout(() => {
-      messageEl.style.background = 'rgba(255,255,255,0.1)';
+      messageEl.textContent = '▼ Say it again. I dare you. ▼';
+      messageEl.style.background = 'rgba(51, 0, 51, 0.4)';
+      messageEl.style.color = '#888888';
+      messageEl.style.textShadow = '0 0 8px #333333';
+      messageEl.style.animation = 'none';
       stage = 2;
       spawnCount = 1;
       spawnIterations = 0;
-    }, 1500);
+    }, 2000);
   }
   else if (stage === 2 && transcript.includes(CMD_REMOVE)) {
     spawnCount *= 2;
@@ -194,28 +249,43 @@ recognition.addEventListener('result', evt => {
     if (spawnCount > 128) spawnCount = 128;
     spawn(spawnCount);
 
-    // Progressive feedback messages
+    // Progressive sarcastic feedback messages
     if (spawnIterations === 1) {
-      messageEl.textContent = `Nice! ${spawnCount} assets spawned! Keep going! 🚀`;
+      messageEl.textContent = `◈ Oh look, ${spawnCount} more things. Thrilling. ◈`;
+      messageEl.style.background = 'linear-gradient(45deg, #331133, #113333)';
+      messageEl.style.animation = 'retroBounce 0.4s ease-in-out';
     } else if (spawnIterations === 2) {
-      messageEl.textContent = `Wow! ${spawnCount} assets! You're getting the hang of this! ⭐`;
+      messageEl.textContent = `▲ ${spawnCount} objects. You're really showing me. ▲`;
+      messageEl.style.background = 'linear-gradient(45deg, #332211, #221133)';
+      messageEl.style.animation = 'retroSlide 0.4s ease-in-out';
     } else if (spawnIterations === 3) {
-      messageEl.textContent = `Amazing! ${spawnCount} assets bouncing around! 🌟`;
+      messageEl.textContent = `◉ Wow. ${spawnCount} spheres. Revolutionary. ◉`;
+      messageEl.style.background = 'linear-gradient(45deg, #113322, #223311)';
+      messageEl.style.animation = 'retroZoom 0.4s ease-in-out';
     } else if (spawnIterations >= 4) {
-      const messages = [
-        "Seriously? You REALLY love saying 'remove it'! 😂",
-        "Are you trying to crash my browser? 🤖💥",
-        "I think you've got the hang of it now! 🎪",
-        "Still going? You're persistent! 🔥",
-        "Okay, okay, I get it - you like voice commands! 🎤"
+      const sarcasticMessages = [
+        "♦ ERROR: User thinks this is impressive ♦",
+        "⚠ WARNING: Detected chronic repetition syndrome ⚠",
+        "◆ DIAGNOSIS: Terminal case of voice addiction ◆",
+        "▼ STATUS: Still not impressed ▼",
+        "☢ ALERT: Maximum cringe levels detected ☢"
       ];
-      const randomMessage = messages[Math.min(spawnIterations - 4, messages.length - 1)];
+      const randomMessage = sarcasticMessages[Math.min(spawnIterations - 4, sarcasticMessages.length - 1)];
       messageEl.textContent = randomMessage;
-      messageEl.style.background = 'rgba(255, 193, 7, 0.3)';
+      messageEl.style.background = 'linear-gradient(45deg, #221122, #112211, #221122)';
+      messageEl.style.animation = 'retroCrazy 1s ease-in-out';
+      
       setTimeout(() => {
-        messageEl.style.background = 'rgba(255,255,255,0.1)';
+        messageEl.style.background = 'rgba(51, 0, 51, 0.4)';
+        messageEl.style.animation = 'none';
       }, 2000);
     }
+    
+    // Reset message styling after animation
+    setTimeout(() => {
+      messageEl.style.color = '#888888';
+      messageEl.style.textShadow = '0 0 8px #333333';
+    }, 500);
   }
 });
 
@@ -295,6 +365,60 @@ window.addEventListener('resize', () => {
   });
 });
 
-// Initialize
-messageEl.textContent = 'Click "Start Listening" to begin your voice-controlled journey! 🎤';
-toggleBtn.textContent = 'Start Listening';
+// Initialize with dark retro sarcastic styling
+messageEl.textContent = '◇ "ADVANCED" VOICE SYSTEM ◇ CLICK IF YOU MUST ◇';
+messageEl.style.color = '#888888';
+messageEl.style.textShadow = '0 0 8px #333333';
+messageEl.style.background = 'rgba(51, 0, 51, 0.4)';
+toggleBtn.textContent = '► "START" LISTENING ◄';
+
+// Add CSS animations to the document with darker theme
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes retroPulse {
+    0%, 100% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.02); filter: brightness(0.8); }
+  }
+  
+  @keyframes retroGlitch {
+    0%, 100% { transform: translateX(0); filter: brightness(1); }
+    10% { transform: translateX(-1px); filter: brightness(0.9); }
+    20% { transform: translateX(1px); filter: brightness(0.8); }
+    30% { transform: translateX(-1px); filter: brightness(0.9); }
+    40% { transform: translateX(1px); filter: brightness(0.7); }
+    50% { transform: translateX(-1px); filter: brightness(0.8); }
+    60% { transform: translateX(1px); filter: brightness(0.9); }
+    70% { transform: translateX(-1px); filter: brightness(0.8); }
+    80% { transform: translateX(1px); filter: brightness(0.9); }
+    90% { transform: translateX(-1px); filter: brightness(0.8); }
+  }
+  
+  @keyframes retroFlash {
+    0%, 100% { opacity: 1; filter: brightness(1); }
+    50% { opacity: 0.8; filter: brightness(0.7); }
+  }
+  
+  @keyframes retroBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+  
+  @keyframes retroSlide {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(5px); }
+  }
+  
+  @keyframes retroZoom {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+  }
+  
+  @keyframes retroCrazy {
+    0% { transform: rotate(0deg) scale(1); filter: brightness(1); }
+    25% { transform: rotate(-2deg) scale(1.01); filter: brightness(0.8); }
+    50% { transform: rotate(2deg) scale(0.99); filter: brightness(0.9); }
+    75% { transform: rotate(-1deg) scale(1.01); filter: brightness(0.8); }
+    100% { transform: rotate(0deg) scale(1); filter: brightness(1); }
+  }
+`;
+document.head.appendChild(style);
