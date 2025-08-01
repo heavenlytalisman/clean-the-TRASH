@@ -1,19 +1,20 @@
 // app.js
 
-// Grab DOM elements
 const spawnArea = document.getElementById('spawn-area');
 const toggleBtn = document.getElementById('toggleBtn');
 const messageEl = document.getElementById('message');
 
 let listening = false;
-let stage = 0;          // 0 = wait "hello"; 1 = wait first remove; 2 = loud remove stage
+let stage = 0;          // 0: tutorial start, 1: wait first remove, 2: explosion/removal loop
 
-let spawnCount = 1;     // Number of assets to spawn (double in stage 2)
-let spawnIterations = 0; // Number of times doubled/spawned in stage 2
+let spawnCount = 1;
+let spawnIterations = 0;
 
-// Voice commands
 const CMD_HELLO  = 'hello';
 const CMD_REMOVE = 'remove it';
+
+// Array holding currently moving asset objects for smooth animation
+let assets = [];
 
 // Set up Web Speech API
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -24,24 +25,16 @@ recognition.continuous = true;
 recognition.interimResults = false;
 recognition.lang = 'en-US';
 
-// Position an element randomly inside spawnArea (not used now, but kept for reference)
-function positionRandom(el) {
-  const maxX = spawnArea.clientWidth - 60;
-  const maxY = spawnArea.clientHeight - 60;
-  const x = Math.random() * maxX;
-  const y = Math.random() * maxY;
-  el.style.transform = `translate(${x}px, ${y}px)`;
-}
-
-// Spawn count assets evenly spaced in a grid layout in spawnArea
+// Helper: create and add animated assets to the spawn area
 function spawn(count = 1) {
-  // Clear previous assets so only current ones are visible
   spawnArea.innerHTML = '';
+  assets = [];
 
-  const assetSize = 60; // Must match CSS .asset size
+  const assetSize = 60;
   const maxWidth = spawnArea.clientWidth;
   const maxHeight = spawnArea.clientHeight;
 
+  // Arrange in a neat grid visually
   const cols = Math.ceil(Math.sqrt(count));
   const rows = Math.ceil(count / cols);
 
@@ -52,31 +45,57 @@ function spawn(count = 1) {
     const asset = document.createElement('div');
     asset.className = 'asset';
 
+    // Grid layout for initial positioning
     const row = Math.floor(i / cols);
     const col = i % cols;
+    let x = hSpacing + col * (assetSize + hSpacing);
+    let y = vSpacing + row * (assetSize + vSpacing);
 
-    const x = hSpacing + col * (assetSize + hSpacing);
-    const y = vSpacing + row * (assetSize + vSpacing);
+    // Each asset will get its own velocity for animation
+    let dx = (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1);
+    let dy = (Math.random() * 2 + 1) * (Math.random() < 0.5 ? -1 : 1);
 
     asset.style.transform = `translate(${x}px, ${y}px)`;
-
     spawnArea.appendChild(asset);
+
+    assets.push({ el: asset, x, y, dx, dy, size: assetSize });
   }
 }
 
+// Animation loop: moves all assets, bounces on edges
+function animate() {
+  const maxWidth = spawnArea.clientWidth;
+  const maxHeight = spawnArea.clientHeight;
+  for (let assetData of assets) {
+    // Update position
+    assetData.x += assetData.dx;
+    assetData.y += assetData.dy;
+
+    // Bounce off edges
+    if (assetData.x <= 0 || assetData.x >= maxWidth - assetData.size) assetData.dx *= -1;
+    if (assetData.y <= 0 || assetData.y >= maxHeight - assetData.size) assetData.dy *= -1;
+
+    assetData.el.style.transform = `translate(${assetData.x}px, ${assetData.y}px)`;
+  }
+  requestAnimationFrame(animate);
+}
+
+// Start animating after page and first spawn
+requestAnimationFrame(animate);
+
 let lastTranscript = '';
 
-// Handle speech recognition results
+// Main speech result handler
 recognition.addEventListener('result', evt => {
   const transcript = Array.from(evt.results)
     .slice(evt.resultIndex)
     .map(r => r[0].transcript.trim().toLowerCase())
     .join(' ');
 
-  // Prevent repeated reaction to the same transcript
   if (transcript === lastTranscript) return;
   lastTranscript = transcript;
 
+  // Tutorial flow
   if (stage === 0 && transcript.includes(CMD_HELLO)) {
     messageEl.textContent = 'Awesome voice! Spawning two items...';
     spawn(2);
@@ -86,39 +105,41 @@ recognition.addEventListener('result', evt => {
     }, 2000);
   }
   else if (stage === 1 && transcript.includes(CMD_REMOVE)) {
-    // Remove one asset
+    // Remove one asset if it exists
     const firstAsset = spawnArea.querySelector('.asset');
     if (firstAsset) firstAsset.remove();
+    // Always keep 'assets' array in sync
+    assets = assets.filter(ad => ad.el !== firstAsset);
+
     messageEl.textContent = 'One gone! Say it louder to remove the last';
     stage = 2;
-    spawnCount = 1;       // reset doubling counter
-    spawnIterations = 0;  // reset iteration count
+    spawnCount = 1;
+    spawnIterations = 0;
   }
   else if (stage === 2 && transcript.includes(CMD_REMOVE)) {
     spawnCount *= 2;
     spawnIterations++;
 
+    if (spawnCount > 64) spawnCount = 64; // Safe cap
+    spawn(spawnCount);
+
     if (spawnIterations < 4) {
-      spawn(spawnCount);
       messageEl.textContent = `Spawned ${spawnCount} item${spawnCount > 1 ? 's' : ''}! Speak louder and clearer to remove more.`;
     } else {
-      // After 4th doubling, mocking the user
-      messageEl.textContent =
-        "Wow, you really like saying that? Are you trying to fill the whole screen with nonsense? 😂";
-      // Cap number of assets to prevent overload
-      spawn(spawnCount > 64 ? 64 : spawnCount);
+      messageEl.textContent = "Wow, you really like saying that? Are you trying to fill the whole screen with nonsense? 😂";
     }
   }
 });
 
-// Toggle voice recognition on button click
+// Button toggles listening on and off
 toggleBtn.addEventListener('click', () => {
   if (listening) {
     recognition.stop();
     toggleBtn.textContent = 'Start';
     messageEl.textContent = 'Click “Start” to begin';
     stage = 0;
-    spawnArea.innerHTML = ''; // Clear spawned assets on stop
+    spawnArea.innerHTML = '';
+    assets = [];
   } else {
     recognition.start();
     toggleBtn.textContent = 'Stop';
