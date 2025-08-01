@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean the TRASH - Voice Interactive Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🗑️ Clean the TRASH! 🗑️</h1>
+            <p id="instructions">Click "Start" and follow the voice prompts to clean up the trash!</p>
+        </header>
+        
+        <div class="game-area">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div class="overlay" id="overlay">
+                <div class="welcome-screen" id="welcomeScreen">
+                    <h2>Welcome to Clean the TRASH!</h2>
+                    <p>Use your voice to clean up falling trash.</p>
+                    <p>The louder you speak, the more effective you'll be!</p>
+                    <button id="startBtn" class="start-button">🎤 Start Game</button>
+                </div>
+                
+                <div class="game-ui" id="gameUI" style="display: none;">
+                    <div class="status-bar">
+                        <div class="volume-meter">
+                            <span>Volume:</span>
+                            <div class="volume-bar">
+                                <div class="volume-fill" id="volumeFill"></div>
+                            </div>
+                        </div>
+                        <div class="trash-count">
+                            <span>Trash Count: <span id="trashCount">0</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="voice-prompt" id="voicePrompt">
+                        <p id="promptText">Say "Hello" to begin!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="resetBtn" class="control-button" style="display: none;">🔄 Reset Game</button>
+            <div class="mic-status" id="micStatus">
+                <span>🎤 Microphone: <span id="micStatusText">Not Connected</span></span>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
