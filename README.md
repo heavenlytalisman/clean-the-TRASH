@@ -39,17 +39,17 @@ No installation needed! Just open `index.html` in a modern browser.
 
 ### Project Documentation
 # Screenshots
-![Initial Screen](screenshot1.png)
+![Initial Screen](https://drive.google.com/file/d/1vYqIa9jqT8NxCKeS8a32e0ixz44ELCna/view?usp=drive_link)
 *The innocent-looking start screen that lures users in*
 
-![Interaction Phase](screenshot2.png)
+![Interaction Phase](https://drive.google.com/file/d/1YbY2VZl2h9O-Ugeg1bhwMDrJ2-39gS-y/view?usp=drive_link)
 *The system encouraging users to interact more*
 
-![Chaos Mode](screenshot3.png)
+![Chaos Mode](https://drive.google.com/file/d/1JLYVUL99ddqXI_VYrc5otGogxYhKcCLQ/view?usp=drive_link)
 *The glorious chaos that ensues when users follow instructions too well*
 
 # Diagrams
-![Workflow](workflow.png)
+![Workflow]()
 *The deceptive workflow that starts friendly but turns chaotic*
 
 ## Team Contributions
