@@ -9,17 +9,31 @@
 <body>
   <div class="container">
     <div class="header">
-      <h3>Remove it</h3>
     </div>
 
     <div id="spawn-area">
-      <!-- Message area where instructions and feedback appear -->
-      <div id="message">Click “Start” to begin</div>
-
-      <!-- Button to toggle voice recognition -->
-      <div class="button">
-        <button id="toggleBtn">Click me</button>
+      <div id="message">Click "Start" to begin</div>
+    </div>
+    
+    <div id="hi-overlay" class="hi-overlay">
+      <div class="hi-content">
+        <img src="./assets/intro.jpg" alt="Intro" class="hi-image" />
+        <div class="hi-text">HI</div>
       </div>
+    </div>
+
+    <!-- Add intro audio with multiple formats for better compatibility -->
+    <audio id="intro-audio" preload="auto">
+      <source src="./assets/intro.mp3" type="audio/mpeg">
+      <source src="./assets/intro.wav" type="audio/wav">
+      <source src="./assets/intro.ogg" type="audio/ogg">
+    </audio>
+
+    <!-- Debug panel - required for the debug functionality -->
+    <div id="debug-panel" class="debug-panel">
+      <div>Stage: <span id="debug-stage">0</span></div>
+      <div>Assets: <span id="debug-assets">0</span></div>
+      <div>Command: <span id="debug-command">none</span></div>
     </div>
   </div>
 
